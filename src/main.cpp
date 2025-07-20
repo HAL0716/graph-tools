@@ -3,6 +3,7 @@
 #include <vector>
 #include <utility>
 #include <unordered_map>
+#include <Eigen/Dense>
 #include "Common.hpp"
 #include "NodeEncoder.hpp"
 
