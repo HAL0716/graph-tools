@@ -6,12 +6,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-file(GLOB SRC_FILES src/*.cpp)
+add_executable(main src/main.cpp)
 
-foreach(SRC IN LISTS SRC_FILES)
-    get_filename_component(TGT ${SRC} NAME_WE)
-    add_executable(${TGT} ${SRC})
-    set_target_properties(${TGT} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-endforeach()
+file(GLOB OTHER_SRC_FILES src/*.cpp)
+list(REMOVE_ITEM OTHER_SRC_FILES ${CMAKE_SOURCE_DIR}/src/main.cpp)
+
+add_library(objects OBJECT ${OTHER_SRC_FILES})
+
+target_link_libraries(main PRIVATE $<TARGET_OBJECTS:objects>)
+
+set_target_properties(main PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
