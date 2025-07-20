@@ -11,6 +11,15 @@ std::ostream& operator<<(std::ostream& os, const std::pair<std::string, int>& no
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<int>>& matrix) {
+    for (const auto& raw : matrix) {
+        for (int val : raw)
+            os << val << " ";
+        os << std::endl;
+    }
+    return os;
+}
+
 int main() {
     constexpr int Q = 3;
     constexpr int T = 3;
@@ -29,21 +38,28 @@ int main() {
     const auto edgeLbls = SYMBOLS.substr(0, Q);
     const int nodeCnt = enc.size();
 
+    std::vector<std::vector<int>> adjMatrix(nodeCnt, std::vector<int>(nodeCnt, 0));
+
     for (const auto& stNode : nodes) {
-        if (stNode == std::make_pair(fword, 0)) continue;
+        if (stNode == std::pair<std::string, int>{fword, 0}) continue;
+        const int stId = enc.encode(stNode);
+
         for (const auto& lbl : edgeLbls) {
-            std::string tgtLbl = stNode.first + lbl;
+            const std::string tgtLbl = stNode.first + lbl;
 
             for (int i = 0; i <= static_cast<int>(tgtLbl.length()); ++i) {
-                std::pair<std::string, int> edNode{tgtLbl.substr(i), (stNode.second + i) % T};
+                const std::pair<std::string, int> edNode{tgtLbl.substr(i), (stNode.second + i) % T};
+                const int edId = enc.encode(edNode);
 
-                if (enc.encode(edNode) < nodeCnt) {
-                    std::cout << stNode << " -" << lbl << "-> " << edNode << '\n';
+                if (edId < nodeCnt) {
+                    adjMatrix[stId][edId]++;
                     break;
                 }
             }
         }
     }
+
+    std::cout << adjMatrix << std::endl;
 
     return 0;
 }
