@@ -39,3 +39,16 @@
 
 # debug information files
 *.dwo
+
+# Build and output directories
+/build/
+/output/
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
