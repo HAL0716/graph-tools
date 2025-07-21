@@ -1,6 +1,5 @@
 #include "Graph/Gen/PFT.hpp"
-#include "Common.hpp"
-
+#include "Utils/Constants.hpp"
 #include <Eigen/Dense>
 #include <cmath>
 #include <algorithm>
@@ -31,7 +30,7 @@ Graph::Data PFT::gen(const std::string& fWord) const {
     const int n = encoder.size();
     Graph::Data graph(n, true, false, true);
     const Node fNode(fWord, 0);
-    const auto edgeLabels = SYMBOLS.substr(0, Q);
+    const auto edgeLabels = Utils::SYMBOLS.substr(0, Q);
 
     for (const auto& stNode : nodes) {
         if (stNode == fNode) continue;
@@ -74,7 +73,7 @@ std::vector<std::string> PFT::getWords(bool useFilter) const {
 
     std::vector<std::string> result;
     result.reserve(total);
-    std::string word(K, SYMBOLS[0]);
+    std::string word(K, Utils::SYMBOLS[0]);
 
     while (true) {
         for (int i = 0; i < K; ++i)
@@ -86,6 +85,8 @@ std::vector<std::string> PFT::getWords(bool useFilter) const {
             indices[pos--] = 0;
         if (pos < 0) break;
     }
+
+    std::sort(result.begin(), result.end());
 
     return result;
 }
@@ -148,7 +149,7 @@ std::string PFT::Word::toString(const std::vector<int>& indices) {
     std::string s;
     s.reserve(indices.size());
     for (int idx : indices)
-        s.push_back(SYMBOLS[idx]);
+        s.push_back(Utils::SYMBOLS[idx]);
     return s;
 }
 
