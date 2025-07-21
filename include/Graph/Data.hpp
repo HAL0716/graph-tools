@@ -24,14 +24,15 @@ public:
     // labeled: ラベル付きグラフかどうか
     Data(unsigned int nodeCount, bool directed = true, bool weighted = false, bool labeled = false);
 
-    // エッジの追加（成功: true）
+    // エッジの追加・削除（成功: true）
     bool addEdge(unsigned int src, unsigned int dst, 
                  std::optional<double> weight = std::nullopt, 
                  std::optional<std::string> label = std::nullopt);
-    // エッジの削除（成功: true）
     bool delEdge(unsigned int src, unsigned int dst, 
                  std::optional<double> weight = std::nullopt, 
                  std::optional<std::string> label = std::nullopt);
+    
+    bool delNodes(const std::vector<unsigned int>& tgtNodes);
 
     // 隣接リストの取得（変更不可）
     const std::vector<std::vector<Edge>>& getAdjList() const;
@@ -46,10 +47,10 @@ public:
     bool isLabeled() const noexcept { return labeled; }
 
 private:
-    const unsigned int nodeCount;           // ノード数（固定）
-    const bool directed;                    // 有向グラフフラグ
-    const bool weighted;                    // 重み付きフラグ
-    const bool labeled;                     // ラベル付きフラグ
+    unsigned int nodeCount;           // ノード数（固定）
+    bool directed;                    // 有向グラフフラグ
+    bool weighted;                    // 重み付きフラグ
+    bool labeled;                     // ラベル付きフラグ
 
     std::vector<std::vector<Edge>> adjList; // 隣接リスト
 

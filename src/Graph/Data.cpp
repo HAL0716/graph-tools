@@ -87,6 +87,39 @@ bool Data::delEdge(unsigned int src, unsigned int dst, std::optional<double> wei
     return true;
 }
 
+bool Data::delNodes(const std::vector<unsigned int>& tgtNodes) {
+    // 削除対象をbool配列に変換
+    std::vector<bool> toDelete(nodeCount, false);
+    for (auto v : tgtNodes) {
+        if (v >= nodeCount) return false;
+        toDelete[v] = true;
+    }
+
+    // 新ノードID割当
+    std::vector<int> newId(nodeCount, -1);
+    unsigned int newCount = 0;
+    for (unsigned int i = 0; i < nodeCount; ++i)
+        if (!toDelete[i])
+            newId[i] = newCount++;
+
+    std::vector<std::vector<Edge>> newAdjList(newCount);
+    for (unsigned int u = 0; u < nodeCount; ++u) {
+        if (toDelete[u]) continue;
+        for (const auto& e : adjList[u]) {
+            if (!toDelete[e.dst]) {
+                newAdjList[newId[u]].push_back({static_cast<unsigned int>(newId[e.dst]), e.weight, e.label});
+            }
+        }
+    }
+
+    // 更新
+    nodeCount = newCount;
+    adjList = std::move(newAdjList);
+    needsUpdate = true;
+
+    return true;
+}
+
 // 隣接リスト取得
 const std::vector<std::vector<Edge>>& Data::getAdjList() const {
     return adjList;

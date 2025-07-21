@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 
 #include "Graph/Gen/PFT.hpp"
+#include "Graph/Transform.hpp"
 #include "Graph/Analyzer.hpp"
 #include "Utils/Func.hpp"
 #include "Utils/Input.hpp"
@@ -24,7 +25,9 @@ int main() {
     result.push_back({"禁止語", "半径", "直径", "平均経路長", "固有値", "符号化率"});
 
     for (const auto& fword : words) {
-        const auto& data = pft.gen(fword);
+        auto data = pft.gen(fword);
+        data = Graph::Transform::delSinkNodes(data);
+
         analyzer.setData(data);
         result.push_back({
             fword, std::to_string(analyzer.radius()), std::to_string(analyzer.diameter()),
