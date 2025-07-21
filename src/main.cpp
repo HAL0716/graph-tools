@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include "Common.hpp"
 #include "Graph/Gen/PFT.hpp"
+#include "Graph/Analyzer.hpp"
 
 int main() {
     constexpr int Q = 3;
@@ -16,17 +17,11 @@ int main() {
     for (const auto& fword : pft.getWords()) {
         auto graph = pft.gen(fword);
 
-        Eigen::MatrixXd adjMat = graph.getAdjMatrix();
-
-        Eigen::EigenSolver<Eigen::MatrixXd> solver(adjMat);
-        const auto& eigvals = solver.eigenvalues();
-
-        double maxReal = eigvals[0].real();
-        for (int i = 1; i < eigvals.size(); ++i)
-            maxReal = std::max(maxReal, eigvals[i].real());
-
         std::cout << "--- " << fword << " ---" << std::endl
-                  << adjMat << std::endl << maxReal << std::endl;
+                  << graph.getAdjMatrix() << std::endl
+                  << Graph::Analyzer::maxEigenvalue(graph) << std::endl
+                  << Graph::Analyzer::avgPathLength(graph) << std::endl
+                  << Graph::Analyzer::diameter(graph) << std::endl;
     }
 
     return 0;
