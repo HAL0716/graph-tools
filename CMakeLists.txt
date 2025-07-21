@@ -11,7 +11,7 @@ include_directories(
 
 add_executable(main src/main.cpp)
 
-file(GLOB OTHER_SRC_FILES src/*.cpp)
+file(GLOB_RECURSE OTHER_SRC_FILES src/*.cpp)
 list(REMOVE_ITEM OTHER_SRC_FILES ${CMAKE_SOURCE_DIR}/src/main.cpp)
 add_library(objects OBJECT ${OTHER_SRC_FILES})
 target_link_libraries(main PRIVATE $<TARGET_OBJECTS:objects>)
