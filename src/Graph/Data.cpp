@@ -113,7 +113,7 @@ void Data::buildMatrix() const {
     for (unsigned int src = 0; src < nodeCount; ++src) {
         for (const Edge& e : adjList[src]) {
             double val = weighted ? e.weight.value_or(1.0) : 1.0;
-            adjMatrix(src, e.dst) = val;
+            adjMatrix(src, e.dst) += val;
         }
     }
 }
