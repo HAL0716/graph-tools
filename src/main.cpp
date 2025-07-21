@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cmath>
 #include <Eigen/Dense>
 
 #include "Graph/Gen/PFT.hpp"
@@ -17,15 +18,20 @@ int main() {
     Graph::Gen::PFT pft(Q, T, K);
     std::vector<std::string> words = pft.getWords();
 
+    Graph::Analyzer analyzer;
     std::vector<std::vector<std::string>> result;
     result.reserve(words.size() + 1);
-    result.push_back({"fword", "maxEigen", "avgPathLen"});
+    result.push_back({"禁止語", "半径", "直径", "平均経路長", "固有値", "符号化率"});
 
     for (const auto& fword : words) {
-        const auto& graph = pft.gen(fword);
-        const double maxEV = Graph::Analyzer::maxEigenvalue(graph);
-        const double avgPL = Graph::Analyzer::avgPathLength(graph);
-        result.push_back({fword, Utils::Func::toStrFix(maxEV, 6), Utils::Func::toStrFix(avgPL, 6)});
+        const auto& data = pft.gen(fword);
+        analyzer.setData(data);
+        result.push_back({
+            fword, std::to_string(analyzer.radius()), std::to_string(analyzer.diameter()),
+            Utils::Func::toStrFix(analyzer.avgPathLength(), 3),
+            Utils::Func::toStrFix(analyzer.maxEigenvalue(), 6),
+            Utils::Func::toStrFix(log(analyzer.maxEigenvalue()) / log(Q), 6),
+        });
     }
 
     const std::string filename = "Q=" + std::to_string(Q) + "_T=" + std::to_string(T) + "_K=" + std::to_string(K) + ".csv";
