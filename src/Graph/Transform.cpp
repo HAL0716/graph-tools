@@ -1,11 +1,12 @@
 #include "Graph/Transform.hpp"
 
+#include <iostream>
+
 #include <vector>
 #include <string>
 #include <unordered_map>
 #include <algorithm>
 #include <utility>
-#include <deque>
 #include "Utils/Func.hpp"
 
 namespace Graph {
@@ -53,52 +54,34 @@ Graph::Data Transform::mergeByMoore(const Graph::Data& data) {
     if (!data.isLabeled()) return data;
 
     const auto& adjList = data.getAdjList();
-    const auto n = data.size();
+    const int N = data.size();
+    std::vector<int> curr(N, -1), next(N, -1);
 
-    std::vector<int> node2id(n, -1);
-    std::unordered_map<int, std::vector<int>> id2nodes;
-    Encoder enc;
-
-    for (int src = 0; src < n; ++src) {
-        std::deque<std::string> key;
-        for (const auto& edge : adjList[src])
-            key.push_back(edge.label.value());
+    auto genKey = [&](int node) {
+        std::vector<std::string> key{std::to_string(curr[node])};
+        for (const auto& edge : adjList[node])
+            if (edge.label) key.emplace_back(edge.label.value() + ":" + std::to_string(curr[edge.dst]));
         std::sort(key.begin(), key.end());
+        return key;
+    };
 
-        int id = enc.encode(key);
-        node2id[src] = id;
-        id2nodes[id].push_back(src);
+    Encoder enc;
+    while (true) {
+        enc.clear();
+        for (int node = 0; node < N; ++node)
+            next[node] = enc.encode(genKey(node));
+
+        if (next == curr)
+            break;
+        
+        curr = next;
     }
 
-    std::vector<int> newNode2id(n, -1);
-    std::unordered_map<int, std::vector<int>> newId2nodes;
+    Graph::Data result(enc.size(), data.isDirected(), data.isWeighted(), data.isLabeled());
 
-    do {
-        std::fill(newNode2id.begin(), newNode2id.end(), -1);
-        newId2nodes.clear();
-        enc.clear();
-
-        for (const auto& [id, nodes] : id2nodes) {
-            for (int src : nodes) {
-                std::deque<std::string> key{std::to_string(id)};
-                for (const auto& edge : adjList[src])
-                    key.push_back(edge.label.value() + ":" + std::to_string(node2id[edge.dst]));
-                std::sort(key.begin(), key.end());
-
-                int newId = enc.encode(key);
-                newNode2id[src] = newId;
-                newId2nodes[newId].push_back(src);
-            }
-        }
-
-        node2id.swap(newNode2id);
-        id2nodes.swap(newId2nodes);
-    } while (newId2nodes.size() != id2nodes.size());
-    
-    Graph::Data result(static_cast<unsigned int>(id2nodes.size()), data.isDirected(), data.isWeighted(), data.isLabeled());
-    for (int src = 0; src < n; ++src)
+    for (int src = 0; src < N; ++src)
         for (const auto& edge : adjList[src])
-            result.addEdge(node2id[src], node2id[edge.dst], edge.weight, edge.label);
+            result.addEdge(curr[src], curr[edge.dst], edge.weight, edge.label);
     
     return result;
 }
