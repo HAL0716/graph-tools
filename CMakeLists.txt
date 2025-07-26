@@ -20,6 +20,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
+# === Spectra を FetchContent で取得 ===
+FetchContent_Declare(
+  Spectra
+  GIT_REPOSITORY https://github.com/yixuan/spectra.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(Spectra)
+
+# Spectra の include ディレクトリを追加
+include_directories(${spectra_SOURCE_DIR}/include)
+
 # === メイン実行ファイル（src/main.cpp） ===
 add_executable(main src/main.cpp)
 
