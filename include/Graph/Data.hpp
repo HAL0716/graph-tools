@@ -16,7 +16,10 @@ struct Edge {
 
 // グラフデータ管理クラス
 class Data {
+
 public:
+    using AdjList = std::vector<std::vector<Edge>>;
+
     // コンストラクタ
     // nodeCount: ノード数
     // directed: 有向グラフかどうか
@@ -35,7 +38,8 @@ public:
     bool delNodes(const std::vector<unsigned int>& tgtNodes);
 
     // 隣接リストの取得（変更不可）
-    const std::vector<std::vector<Edge>>& getAdjList() const;
+    const Data::AdjList& getAdjList() const;
+    const Data::AdjList getReversedAdjList() const;
     // 隣接行列の取得（変更不可）
     const Eigen::MatrixXd& getAdjMatrix() const;
     // ノード数の取得
@@ -52,7 +56,7 @@ private:
     bool weighted;                    // 重み付きフラグ
     bool labeled;                     // ラベル付きフラグ
 
-    std::vector<std::vector<Edge>> adjList; // 隣接リスト
+    AdjList adjList; // 隣接リスト
 
     mutable Eigen::MatrixXd adjMatrix;      // 隣接行列
     mutable bool needsUpdate;               // 隣接行列の更新が必要: true
@@ -60,5 +64,13 @@ private:
     // adjListを元にadjMatrixを再構築
     void buildMatrix() const;
 };
+
+
+inline bool hasEdge(const Data::AdjList& adj, unsigned int src, unsigned int dst) {
+    if (src >= adj.size()) return false;
+    const auto& edges = adj[src];
+    return std::any_of(edges.begin(), edges.end(),
+                       [dst](const Edge& e){ return e.dst == dst; });
+}
 
 } // namespace Graph

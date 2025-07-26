@@ -102,7 +102,7 @@ bool Data::delNodes(const std::vector<unsigned int>& tgtNodes) {
         if (!toDelete[i])
             newId[i] = newCount++;
 
-    std::vector<std::vector<Edge>> newAdjList(newCount);
+    AdjList newAdjList(newCount);
     for (unsigned int u = 0; u < nodeCount; ++u) {
         if (toDelete[u]) continue;
         for (const auto& e : adjList[u]) {
@@ -121,8 +121,22 @@ bool Data::delNodes(const std::vector<unsigned int>& tgtNodes) {
 }
 
 // 隣接リスト取得
-const std::vector<std::vector<Edge>>& Data::getAdjList() const {
+const Data::AdjList& Data::getAdjList() const {
     return adjList;
+}
+
+const Data::AdjList Data::getReversedAdjList() const {
+    if (!directed)
+        return adjList;
+
+    AdjList reversed(nodeCount);
+    for (unsigned int src = 0; src < nodeCount; ++src) {
+        for (const auto& edge : adjList[src]) {
+            Edge revEdge{ src, edge.weight, edge.label };
+            reversed[edge.dst].push_back(revEdge);
+        }
+    }
+    return reversed;
 }
 
 // 隣接行列取得
