@@ -1,12 +1,9 @@
 #include "Graph/Transform.hpp"
 
-#include <iostream>
-
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include <algorithm>
-#include <utility>
+// #include <vector>
+// #include <algorithm>
+// #include <utility>
+#include "Graph/Encoder.hpp"
 #include "Utils/Func.hpp"
 
 namespace Graph {
@@ -33,21 +30,6 @@ Graph::Data Transform::delSinkNodes(const Graph::Data& data, bool isRecursive) {
     }
 
     return current;
-}
-
-int Transform::Encoder::encode(const std::string& val) {
-    auto [it, inserted] = table_.insert({val, nextId_});
-    if (inserted) ++nextId_;
-    return it->second;
-}
-
-int Transform::Encoder::size() const {
-    return static_cast<int>(table_.size());
-}
-
-void Transform::Encoder::clear() {
-    table_.clear();
-    nextId_ = 0;
 }
 
 Graph::Data Transform::mergeByMoore(const Graph::Data& data) {

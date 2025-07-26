@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <unordered_set>
 #include <stdexcept>
+#include "Graph/Encoder.hpp"
 
 namespace Graph::Gen {
 
@@ -24,24 +25,25 @@ Graph::Data PFT::gen(const std::string& fWord) const {
 
     const auto nodes = createNodes(fWord);
 
-    Encoder encoder;
-    encoder.addNodes(nodes);
+    Encoder enc;
+    for (const auto& n : nodes)
+        enc.encode(n.toStr());
 
-    const int n = encoder.size();
+    const int n = enc.size();
     Graph::Data graph(n, true, false, true);
     const Node fNode(fWord, 0);
     const auto edgeLabels = Utils::SYMBOLS.substr(0, Q);
 
     for (const auto& stNode : nodes) {
         if (stNode == fNode) continue;
-        int stId = encoder.encode(stNode);
+        int stId = enc.encode(stNode.toStr());
 
         for (const auto& lbl : edgeLabels) {
             std::string tgtLbl = stNode.label + lbl;
 
             for (int i = 0; i <= static_cast<int>(tgtLbl.length()); ++i) {
                 Node edNode{tgtLbl.substr(i), static_cast<int>((stNode.phase + i) % T)};
-                int edId = encoder.encode(edNode);
+                int edId = enc.encode(edNode.toStr());
                 
                 if (graph.addEdge(stId, edId, std::nullopt, std::string(1, lbl)))
                     break;
@@ -89,23 +91,6 @@ std::vector<std::string> PFT::getWords(bool useFilter) const {
     std::sort(result.begin(), result.end());
 
     return result;
-}
-
-// --- Encoder 実装 ---
-void PFT::Encoder::addNodes(const std::vector<Node>& nodes) {
-    for (const auto& node : nodes) {
-        encode(node);
-    }
-}
-
-int PFT::Encoder::encode(const Node& node) {
-    auto [it, inserted] = table_.insert({node, nextId_});
-    if (inserted) ++nextId_;
-    return it->second;
-}
-
-int PFT::Encoder::size() const {
-    return static_cast<int>(table_.size());
 }
 
 // --- Word 実装 ---
