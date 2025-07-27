@@ -1,8 +1,13 @@
 #include "Graph/Analyzer.hpp"
 #include <queue>
-#include <Eigen/Eigenvalues>
 #include <limits>
 #include <numeric>
+
+#include <iostream>
+#include <Spectra/GenEigsSolver.h>
+#include <Spectra/MatOp/DenseGenMatProd.h>
+#include <Eigen/Eigenvalues>
+#include <Eigen/SparseCore>
 
 namespace Graph {
 
@@ -116,15 +121,50 @@ double Analyzer::avgPathLength() {
     return avgPL;
 }
 
-void Analyzer::calcEigen() {
-    const auto& A = g->getAdjMatrix();
-    Eigen::EigenSolver<Eigen::MatrixXd> solver(g->getAdjMatrix());
-    maxEigen = solver.eigenvalues().real().maxCoeff();
-    eigenCalced = true;
+void Analyzer::calcEigen(bool preferSpectra) {
+    const Eigen::MatrixXd& A = g->getAdjMatrix();
+    const int n = A.rows();
+
+    auto calcWithEigen = [&]() {
+        Eigen::EigenSolver<Eigen::MatrixXd> solver(A);
+        if (solver.info() == Eigen::Success) {
+            maxEigen = solver.eigenvalues().real().maxCoeff();
+            eigenCalced = true;
+        }
+    };
+
+    auto calcWithSpectra = [&]() {
+        const int nev = 1;
+        const int ncv = std::min(std::max(3, 2 * nev + 1), n - 1);
+
+        try {
+            Spectra::DenseGenMatProd<double> op(A);
+            Spectra::GenEigsSolver<Spectra::DenseGenMatProd<double>> solver(op, nev, ncv);
+            solver.init();
+            int nconv = solver.compute(Spectra::SortRule::LargestReal);
+
+            if (solver.info() == Spectra::CompInfo::Successful && nconv > 0) {
+                maxEigen = solver.eigenvalues()[0].real();
+                eigenCalced = true;
+            }
+        }
+        catch (const std::exception& e) {
+            std::cerr << "[Spectra] exception: " << e.what() << std::endl;
+        }
+    };
+
+    maxEigen = std::numeric_limits<double>::quiet_NaN();
+
+    if (preferSpectra && n > 3)
+        calcWithSpectra();
+
+    if (!eigenCalced)
+        calcWithEigen();
 }
 
-double Analyzer::maxEigenvalue() {
-    if (!eigenCalced) calcEigen();
+
+double Analyzer::maxEigenvalue(bool preferSpectra) {
+    if (!eigenCalced) calcEigen(preferSpectra);
     return maxEigen;
 }
 

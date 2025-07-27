@@ -15,11 +15,11 @@ public:
     int radius();
     double avgPathLength();
     const std::vector<int>& eccentricity();
-    double maxEigenvalue();
+    double maxEigenvalue(bool preferSpectra = false);
 
 private:
     void calcDist();
-    void calcEigen();
+    void calcEigen(bool preferSpectra);
 
     const Data* g = nullptr;
 

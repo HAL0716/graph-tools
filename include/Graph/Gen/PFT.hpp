@@ -22,6 +22,10 @@ private:
         std::string label;
         int phase;
 
+        std::string toStr() const {
+            return "(" + label + "," + std::to_string(phase) + ")";
+        }
+
         bool operator==(const Node& other) const {
             return label == other.label && phase == other.phase;
         }
@@ -31,17 +35,6 @@ private:
                 return std::hash<std::string>()(n.label) ^ (std::hash<int>()(n.phase) << 1);
             }
         };
-    };
-
-    class Encoder {
-    public:
-        void addNodes(const std::vector<Node>& nodes);
-        int encode(const Node& node);
-        int size() const;
-
-    private:
-        std::unordered_map<Node, int, Node::hash> table_;
-        int nextId_ = 0;
     };
 
     class Word {
